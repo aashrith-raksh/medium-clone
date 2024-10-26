@@ -1,13 +1,24 @@
-import { Hono } from 'hono'
+import { Hono } from "hono";
 
-const authRouter = new Hono()
+import { PrismaClient } from "@prisma/client/edge";
+import { withAccelerate } from "@prisma/extension-accelerate";
 
-authRouter.post('/signup', (c) => {
-  return c.text('SIGNUP HIT')
-})
+const authRouter = new Hono<{
+  Bindings: {
+    DATABASE_URL: string;
+  };
+}>();
 
-authRouter.post('/signin', (c) => {
-  return c.text('SIGNIN HIT')
-})
+authRouter.post("/signup", (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
 
-export default authRouter
+  return c.text("SIGNUP HIT");
+});
+
+authRouter.post("/signin", (c) => {
+  return c.text("SIGNIN HIT");
+});
+
+export default authRouter;
