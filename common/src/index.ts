@@ -10,20 +10,22 @@ export const signInInput = z.object({
   password: z.string().min(8),
 });
 
-export type SignUpType = z.infer<typeof signUpInput>;
-export type SignInType = z.infer<typeof signInInput>;;
-
 export const newBlogInput = z.object({
   title: z.string(),
   content: z.string(),
 });
 
-export type NewBlogType = z.infer<typeof newBlogInput>;
-
 export const updateBlogInput = z.object({
-  title: z.string().optional(),
-  content: z.string().optional(),
+  title: z.string(),
+  content: z.string(),
   postId: z.string(),
 });
+
+
+
+export type SignUpType = z.infer<typeof signUpInput>;
+export type SignInType = z.infer<typeof signInInput>;
+
+export type NewBlogType = z.infer<typeof newBlogInput>;
 
 export type UpdateBlogType = z.infer<typeof updateBlogInput>;
