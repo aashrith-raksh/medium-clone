@@ -2,7 +2,7 @@ import { Hono } from "hono";
 
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
-import { sign, verify } from "hono/jwt";
+import { sign } from "hono/jwt";
 
 const authRouter = new Hono<{
   Bindings: {
@@ -41,15 +41,14 @@ authRouter.post("/signup", async (c) => {
       200
     );
   } catch (error) {
-    if (error instanceof Error) console.log(error.message);
-
-    return c.json(
-      {
-        //@ts-ignore
-        message: error.message || "Error signing up",
-      },
-      500
-    );
+    if (error instanceof Error) {
+      return c.json(
+        {
+          message: error.message || "Error signing up",
+        },
+        500
+      );
+    }
   }
 });
 
@@ -57,13 +56,14 @@ authRouter.post("/signin", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
+
   const { email, password } = await c.req.json();
 
   try {
     const user = await prisma.user.findUnique({
       where: {
         email,
-        password
+        password,
       },
     });
 
@@ -80,15 +80,16 @@ authRouter.post("/signin", async (c) => {
     return c.json(
       {
         message: "Sign In successful",
-        token: jwt
+        token: jwt,
       },
       200
     );
   } catch (error) {
-    return c.json({
-      // @ts-ignore
-      message: error.message || "error while sign in ",
-    });
+    if (error instanceof Error) {
+      return c.json({
+        message: error.message || "error while sign in ",
+      });
+    }
   }
 });
 
