@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import checkAuth from "../middlewares/checkAuth";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
+import { newBlogInput, updateBlogInput } from "@aashrith-raksh/medium-clone-common";
 
 const blog = new Hono<{
   Bindings: {
@@ -19,7 +20,20 @@ blog.post("/", checkAuth, async (c) => {
   }).$extends(withAccelerate());
 
   const userId = c.get("userId");
-  const { title, content } = await c.req.json();
+  const body = await c.req.json();
+
+  const { success } = newBlogInput.safeParse(body);
+
+  if (!success) {
+    return c.json(
+      {
+        message: "Invalid inputs",
+      },
+      403
+    );
+  }
+
+  const { title, content } = body;
 
   try {
     const newPost = await prisma.post.create({
@@ -41,7 +55,20 @@ blog.put("/", checkAuth, async (c) => {
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  const { title, content, postId } = await c.req.json();
+  const body = await c.req.json();
+
+  const { success } = updateBlogInput.safeParse(body);
+
+  if (!success) {
+    return c.json(
+      {
+        message: "Invalid inputs",
+      },
+      403
+    );
+  }
+
+  const { title, content, postId } = body
 
   try {
     const postToUpdate = await prisma.post.findUnique({
@@ -51,7 +78,6 @@ blog.put("/", checkAuth, async (c) => {
     if (!postToUpdate) {
       throw new Error("Invaid postId. No such post exists to update");
     }
-
 
     const updatedPost = await prisma.post.update({
       where: {
@@ -81,7 +107,6 @@ blog.get("/bulk", async (c) => {
 
   try {
     const posts = await prisma.post.findMany();
-
 
     if (!posts) {
       throw new Error("Error while fetching posts");
@@ -122,7 +147,5 @@ blog.get("/:id", checkAuth, async (c) => {
     });
   }
 });
-
-
 
 export default blog;

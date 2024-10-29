@@ -14,13 +14,12 @@ exports.signInInput = zod_1.default.object({
     email: zod_1.default.string().email(),
     password: zod_1.default.string().min(8),
 });
-;
 exports.newBlogInput = zod_1.default.object({
     title: zod_1.default.string(),
     content: zod_1.default.string(),
 });
 exports.updateBlogInput = zod_1.default.object({
-    title: zod_1.default.string().optional(),
-    content: zod_1.default.string().optional(),
+    title: zod_1.default.string(),
+    content: zod_1.default.string(),
     postId: zod_1.default.string(),
 });
